@@ -1,24 +1,37 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { Suspense, useState, useTransition } from "react";
+import "./App.css";
+import { MyErrorBoundary } from "./components/ErrorBoundary";
+
+const Home = React.lazy(() => import("./components/Home"));
+const About = React.lazy(() => import("./components/About"));
+
+const FallBack = () => (
+  <div>
+    <h1>Loading</h1>
+  </div>
+);
 
 function App() {
+  const [idx, setIdx] = useState(0);
+  const [isPending, startTransition] = useTransition();
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <h1>Tabs</h1>
+      {isPending && <h1>Loafing</h1>}
+      <div>
+        <button onClick={() => startTransition(() => setIdx(0))}>Home</button>
+        <button onClick={() => startTransition(() => setIdx(1))}>About</button>
+      </div>
+      <Suspense fallback={<FallBack />}>
+        {idx === 0 ? (
+          <MyErrorBoundary>
+            <Home />
+          </MyErrorBoundary>
+        ) : (
+          <About />
+        )}
+      </Suspense>
     </div>
   );
 }
